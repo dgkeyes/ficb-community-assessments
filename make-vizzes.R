@@ -33,52 +33,38 @@ cgm_data <- path %>%
     type_of_rating == "self_assess_past" ~ "2018 Community Baseline",
     type_of_rating == "self_assess_present" ~ "2019 Community Self Assessment",
   )) %>% 
-  # mutate(item = str_wrap(item, 25)) %>%
+  # mutate(item = str_wrap(item, 20)) %>%
   mutate(item = fct_inorder(item)) %>% 
   mutate(item = fct_rev(item)) %>% 
   mutate(type_of_rating = factor(type_of_rating, 
-                                 levels = c("2018 Community Baseline",
-                                            "FICB Assessment",
-                                            "2019 Community Self Assessment",
-                                            "Community Goal"))) %>% 
-  # mutate(type_of_rating = fct_rev(type_of_rating)) %>% 
+                                 levels = c("2019 Community Self Assessment",
+                                            "2018 Community Baseline",
+                                            "Community Goal",
+                                            "FICB Assessment"))) %>% 
   mutate(category = rep(c("Connections", "Connections", "Connections", "Connections",
                           "Capacity", "Capacity", "Capacity", "Capacity",
                           "CL Action", "CL Action", "CL Action", "CL Action",
                           "CB Culture", "CB Culture", "CB Culture", "CB Culture"), 12)) %>% 
-  mutate(category = factor(category, levels = c("Connections", "Capacity", "CL Action", "CB Culture")))
+  mutate(category = factor(category, levels = c("Connections", "Capacity", "CL Action", "CB Culture"))) %>% 
+  mutate(category = str_to_upper(category))
 
 
 
 # Define things for plots -------------------------------------------------
 
-x_axis_labels = c("1\nEmerging",
-                  "2\nCommitted",
-                  "3\nIntentional",
-                  "4\nStrategic",
-                  "5\nCatalytic",
-                  "6\nTransformational")
-
 tfff_dark_green <- "#265142"
 tfff_light_green <- "#B5CC8E"
-tfff_orange <- "#e65100"
 tfff_yellow <- "#FBC02D"
-tfff_blue <- "#283593"
-tfff_red <- "#B71C1C"
-tfff_dark_gray <- "#545454"
 tfff_medium_gray <- "#a8a8a8"
 tfff_light_gray <- "#eeeeee"
 
-ficb_palette <- c(tfff_medium_gray,
-                  tfff_yellow,
-                  tfff_light_green,
-                  tfff_dark_green)
+ficb_palette <- c("#6E8F68", 
+                  tfff_light_green, 
+                  tfff_dark_green,
+                  tfff_yellow)
 
 
-
-
-# Dot Plot v2 -------------------------------------------------------------
-
+# Dot Plot -------------------------------------------------------------
 
 dk_make_save_cgm_plot <- function(community) {
 
@@ -89,37 +75,38 @@ ggplot(cgm_data_filtered, aes(item, rating,
                              color = type_of_rating,
                              shape = type_of_rating,
                              size = type_of_rating,
-                             group = item,
-                             alpha = type_of_rating)) +
+                             group = item)) +
   geom_line(size = 2.5,
-            alpha = 0.5,
-            color = tfff_medium_gray,
+            color = "#D9D9D9",
             show.legend = F) +
-  geom_point(alpha = 0.7) +
+  geom_point() +
   coord_flip() +
-  scale_shape_manual(values = c(16, 124, 16, 16)) +
+  scale_shape_manual(values = c(16, 16, 16, 124)) +
   scale_color_manual(values = ficb_palette) +
-  scale_size_manual(values = c(7, 10, 10, 7)) +
+  scale_size_manual(values = c(9, 7, 8, 7)) +
   theme_ipsum(base_family = "Inter",
               base_size = 12) +
   theme(legend.position = "none",
         plot.title = element_blank(),
         axis.text.x = element_text(size = 8),
         strip.text = element_text(face = "bold"),
+        panel.spacing = unit(1, "pt"),
+        plot.margin = unit(rep(0, 4), "pt"),
         axis.title = element_blank()) +
   labs(color = "",
        title = "") +
-  scale_y_continuous(limits = c(0, 6),
-                     breaks = seq(0, 6, by = 1),
-                     labels = seq(0, 6, by = 1)) +
+  scale_y_continuous(limits = c(0.5, 6),
+                     breaks = seq(1, 6, by = 1),
+                     labels = seq(1, 6, by = 1)) +
   facet_wrap(~category,
              scale = "free",
              ncol = 1)
 
 ggsave(paste0("plots/dot-plot-", str_to_lower(community), ".pdf"),
        device = cairo_pdf,
-       width = 7.75,
-       height = 9)
+       width = 7.5,
+       height = 8.25)
+
 }
 
 
